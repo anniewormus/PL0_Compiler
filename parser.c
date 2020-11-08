@@ -6,7 +6,7 @@
 
 //method prototypes
 symbol* parser(lexeme* list);
-void block(symbol* table, int token);
+void block(symbol* table, lexeme* list, int token);
 void constDeclaration(symbol* table, int token);
 void varDeclaration(symbol* table, int token);
 void statement(symbol* table, int token);
@@ -21,15 +21,16 @@ int relopCheck(int token, int sym);
 
 int lexIndex = 0, symTableIndex = 0, check;
 token_type token;
-symbol *table;      //symbol table
+symbol* table;      //symbol table
+lexeme* list;
 
 symbol* parser(lexeme* list){
     table = malloc(500 * sizeof(symbol));
     
     int i = 0;
 
-    token = lexemeList[lexIndex].tokenVal;
-    block(table, token);
+    token = list[lexIndex].type;
+    block(table, list, token);
 
     //if program doesn't end in a period throw error
     if(token != periodsym){
@@ -40,7 +41,7 @@ symbol* parser(lexeme* list){
     return table;
 }
 
-void block(symbol* table, int token){
+void block(symbol* table, lexeme* list, int token){
     if(token == constsym){
         constDeclataion(table, token);
     }else if(token == varsym){
@@ -55,12 +56,12 @@ void constDeclaration(symbol* table, int token){
     char * varName;
     do{
         lexIndex++;
-        token = lexemeList[lexIndex].tokenVal;
+        token = list[lexIndex].type;
         if(token != identsym){
             printf("ERROR: Const must be followed by identifier");
         }
     
-        token = lexemeList[lexIndex].varname;
+        token = list[lexIndex].name;
 
         //checks to see if the constant varible has already been declared
         check = symCheck(lexIndex, table, token);
@@ -112,7 +113,7 @@ void varDeclaration(symbol* table, int token){
             if(check == 0){
                 printf("ERROR: Identifier Already Exists");
             }else if(check == 1){
-                addToSymTable(table, 2, lexemeList[lexIndex].varname, 0, 0, numVars + 2, 0);
+                addToSymTable(table, 2, list[lexIndex].name, 0, 0, numVars + 2, 0);
             }
 
             token = getNextToken(token);
@@ -130,7 +131,7 @@ void statement(symbol* table, int token){
     switch(token){
         case identsym:
             //if ident is not in symbol table
-            check = symCheck(symTableIndex, table, lexemeList[lexIndex].varname);
+            check = symCheck(symTableIndex, table, list[lexIndex].name);
             if(check == 0){
                 printf("ERROR: Undeclared Identifier");
             }
@@ -183,7 +184,7 @@ void statement(symbol* table, int token){
                 printf("ERROR: Call Must Be Followed By An Identifier");
             }
             //check to see if identifier is on symbol table
-            check = symCheck(symTableIndex, table, lexemeList[lexIndex].varname);
+            check = symCheck(symTableIndex, table, list[lexIndex].name);
             if(check == 1){
                 printf("ERROR: Undeclared Identifier");
             }
@@ -197,7 +198,7 @@ void statement(symbol* table, int token){
             if(token != identsym){
                 printf("ERROR: Call Must Be Followed By An Identifier");
             }
-            check = symCheck(symTableIndex, table, lexemeList[lexIndex].varname);
+            check = symCheck(symTableIndex, table, list[lexIndex].name);
             if(check == 1){
                 printf("ERROR: Undeclared Identifier");
             }
@@ -249,7 +250,7 @@ void term(int token){
 
 void factor(symbol* table, int token){
     if(token == identsym){
-        check = symCheck(symTableIndex, table, lexemeList[lexIndex].varname);
+        check = symCheck(symTableIndex, table, list[lexIndex].name);
             if(check == 1){
                 printf("ERROR: Undeclared Identifier");
             }
@@ -292,7 +293,7 @@ void addToSymTable(symbol* sym, int kind, char* name, int val, int lex, int m, i
 
 int getNextToken(token_type token){
     lexIndex++;
-    return lexemeList[lexIndex].tokenVal;
+    return list[lexIndex].type;
 }
 
 int relopCheck(int token, int sym){

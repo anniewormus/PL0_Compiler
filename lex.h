@@ -1,5 +1,3 @@
-#define __LEX_H
-
 typedef struct lexeme
 {
 	char *name;
@@ -28,9 +26,6 @@ typedef struct
     char varname[10]; //in slides
     int errorType;
 } tokenStruct;
-
-tokenStruct lexemeList[3000]; //array of token structs
-int lexcount = 0;   //keeps track of array location
 
 lexeme* lexAnalyze(char* inputFile);
 

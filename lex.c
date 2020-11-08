@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+//#include <ctype.h>
 #include <lex.h>
 
 //array for reserved words names
@@ -14,8 +15,12 @@ char *reservedWords[] = {"const", "var", "procedure", "call", "begin", "end", "i
 char specialSyms[] = {'+', '-', '*', '/', '(', ')', '=', ',', '.', '<', '>', ';', ':'};
 
 tokenStruct lexemeList[3000]; //array of token structs
+lexcount = 0;
+lexeme *list;
 
-lexeme* lexAnalyzer(char* inputFile){
+lexeme* lex_analyzer(char *inputfile)
+{
+    *list = malloc(500 * sizeof(lexeme));
 
     int peek = 0; //used in the event of multiple characater tokens
 
@@ -348,6 +353,7 @@ lexeme* lexAnalyzer(char* inputFile){
             c = fgetc(input);
         }
     }
+    
     //print out lexeme list and token type
     int i = 0;
     printf("\nLEXEME TABLE:\nLEXEME\tTOKEN TYPE\n");
@@ -384,15 +390,19 @@ lexeme* lexAnalyzer(char* inputFile){
     printf("\nLEXEME LIST\n");
     for (i = 0; i < lexcount; i++)
     {
+        list[i].type = lexemeList[i].tokenVal;
         printf("%d ", lexemeList[i].tokenVal);
         if (lexemeList[i].tokenVal == 2)
         {
+            list[i].name = lexemeList[i].varname;
             printf("%s ", lexemeList[i].varname);
         }
         else if (lexemeList[i].tokenVal == 3)
         {
+            list[i].value = lexemeList[i].numVal;
             printf("%d ", lexemeList[i].numVal);
         }
     }
-    return lexemeList;
+    printf("lex is analyzed\n");
+    return list;
 }
