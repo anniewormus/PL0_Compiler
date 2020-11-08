@@ -20,7 +20,7 @@ lexeme *list;
 
 lexeme* lex_analyzer(char *inputfile)
 {
-    *list = malloc(500 * sizeof(lexeme));
+    list = malloc(500 * sizeof(lexeme));
 
     int peek = 0; //used in the event of multiple characater tokens
 
