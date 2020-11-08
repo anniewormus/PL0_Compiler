@@ -9,8 +9,11 @@ FILE * outF;
 
 int lexIndex = 0, symTableIndex = 0;
 token_type token;
+symbol *table;
 
-void parser(void){
+symbol* parser(lexeme* list){
+    table = malloc(500 * sizeof(symbol));
+    
     //inF = fopen("lexOUT.txt", "r");
    // outF = fopen("parserOUT.txt", "w");
 
@@ -22,6 +25,8 @@ void parser(void){
         printf("ERROR: Period Expected");
     }
 
+    printf("symbols are parsed\n");
+    return table;
 }
 
 void block(int token){
@@ -40,9 +45,8 @@ void constDeclaration(){
             printf("ERROR: Const must be followed by identifier");
         }
         lexIndex++;
-        token = lexemeList[lexIndex].varname;
 
-        toSymTable(token, symTableIndex);
+        toSymTable(lexemeList[lexIndex].varname, symTableIndex);
 
     } while(token == commasym);
 }
@@ -57,11 +61,12 @@ void toSymTable(token_type token, int index){
     int i;
 
     for(i = 0; i < index; i++){
-        if()
+        if(strcmp(table[i].name, token)){
+            printf("ERROR: Identifier Already Exists");
+            return;
+        }
     }
+    
+    
 }
-// int getToken(FILE * inF){
-//     int c;
-//     fscanf(inF, "%d", &c);
-//     return c;
-// }
+

@@ -1,5 +1,3 @@
-#define __PARSER_H
-
 #include "lex.h"
 
 #define MAX_LIST_SIZE 500
@@ -15,4 +13,4 @@ typedef struct symbol
 	
 } symbol;
 
-extern symbol symTable[500];
+symbol* parse(lexeme* list);
