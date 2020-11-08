@@ -4,22 +4,64 @@
 
 #include "parser.h"
 
-FILE * inF;        //input: tokens - output of scanner
+FILE * inF;        //input: Lexeme list
 FILE * outF;
 
+int lexIndex = 0, symTableIndex = 0;
+token_type token;
+
 void parser(void){
-    inF = fopen("lexOUT.txt", "r");
-    outF = fopen("parserOUT.txt", "w");
+    //inF = fopen("lexOUT.txt", "r");
+   // outF = fopen("parserOUT.txt", "w");
 
-    char c = fgetc(inF);
+    int i = 0;
 
-    while(c != EOF){
-        if(c != '.'){
-            
-        }
+    token = lexemeList[lexIndex].tokenVal;
+    block(token);
+    if(token != periodsym){
+        printf("ERROR: Period Expected");
     }
 
-    //populate tokens array
-   
+}
+
+void block(int token){
+    if(token == constsym){
+        constDeclataion();
+    }else if(token == varsym){
+        varDeclaration();
+    }else{
+        statement();
+    }
+}
+void constDeclaration(){
+    do{
+        token = lexemeList[lexIndex].tokenVal;
+        if(token != identsym){
+            printf("ERROR: Const must be followed by identifier");
+        }
+        lexIndex++;
+        token = lexemeList[lexIndex].varname;
+
+        toSymTable(token, symTableIndex);
+
+    } while(token == commasym);
+}
+void varDeclaration(){
 
 }
+void statement(){
+
+}
+
+void toSymTable(token_type token, int index){
+    int i;
+
+    for(i = 0; i < index; i++){
+        if()
+    }
+}
+// int getToken(FILE * inF){
+//     int c;
+//     fscanf(inF, "%d", &c);
+//     return c;
+// }
