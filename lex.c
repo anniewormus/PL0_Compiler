@@ -5,8 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <ctype.h>
-#include <lex.h>
+#include <ctype.h>
+#include "lex.h"
 
 //array for reserved words names
 char *reservedWords[] = {"const", "var", "procedure", "call", "begin", "end", "if", "then", "else", "while", "do", "read", "write", "odd"};
@@ -15,10 +15,11 @@ char *reservedWords[] = {"const", "var", "procedure", "call", "begin", "end", "i
 char specialSyms[] = {'+', '-', '*', '/', '(', ')', '=', ',', '.', '<', '>', ';', ':'};
 
 tokenStruct lexemeList[3000]; //array of token structs
-lexcount = 0;
+int lexcount = 0;
+
 lexeme *list;
 
-lexeme* lex_analyzer(char *inputfile)
+lexeme* lex_analyze(char *inputfile)
 {
     list = malloc(500 * sizeof(lexeme));
 
@@ -27,7 +28,7 @@ lexeme* lex_analyzer(char *inputfile)
     //get file name from user input
     char fileName[25];
     printf("What is your input file called? ");
-    scanf("%s", fileName);
+    if(scanf("%s", fileName) > 0);
 
     FILE *input = fopen(fileName, "r");
     int c = fgetc(input); //stores each character in file
@@ -82,9 +83,9 @@ lexeme* lex_analyzer(char *inputfile)
                 
             }
             //check to see if word is a reserve word
-            int i = 0;
+            int i;
             int reswordcheck = 100;
-            for (i; i < 14; i++)
+            for (i = 0; i < 14; i++)
             {
                 if (strcmp(word, reservedWords[i]) == 0)
                 {
@@ -191,7 +192,7 @@ lexeme* lex_analyzer(char *inputfile)
             //if the character is a special symbol
             peek = 0;
             int i;
-            int sym;
+            int sym = 100;
             for (i = 0; i < 13; i++)
             {
                 if (c == specialSyms[i])
@@ -355,9 +356,9 @@ lexeme* lex_analyzer(char *inputfile)
     }
     
     //print out lexeme list and token type
-    int i = 0;
+    int i;
     printf("\nLEXEME TABLE:\nLEXEME\tTOKEN TYPE\n");
-    for (i; i < lexcount; i++)
+    for (i = 0; i < lexcount; i++)
     {
         if (lexemeList[i].tokenVal == 3)
         {

@@ -1,9 +1,11 @@
 // COP3402
 // 9.22.2020 - Andrea Wormus
 // This code demonstrates a functioning P-Machine VM by reading in a
-// file containing machine code and correctly executing it
+// file containing machine code and correctly executing it.
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "codegen.h"
 
 #define MAX_STACK_HEIGHT 1000
 #define MAX_CODE_LENGTH 500
@@ -14,15 +16,8 @@ int AR; //activation record location
 int base(int, int);
 void print(int[], int[], int, int, int);
 
-typedef struct instruction
-{
-    int op;
-    int r;
-    int l;
-    int m;
-} instruction;
 
-int main()
+void virtual_machine(instruction *code)
 {
     FILE *inputLength;
     FILE *input;
@@ -30,13 +25,12 @@ int main()
     int SP = MAX_STACK_HEIGHT;
     int BP = SP - 1;
     int PC = 0;
-    int IR = 0;
     int RF[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 
     inputLength = fopen("input.txt", "r");
 
     //see how many lines are in file
-    char c;
+    char c = getc(inputLength);
     int length = 0;
     while (c != EOF)
     {
@@ -51,11 +45,11 @@ int main()
 
     input = fopen("input.txt", "r");
     //allocate memory for array of structs storing file contents
-    instruction *ir = (struct instruction *)malloc((length - 1) * sizeof(struct instruction));
+    instruction *ir = (instruction *)malloc((unsigned int)(length - 1) * sizeof(instruction));
     int i;
     for (i = 0; i < length; i++)
     {
-        fscanf(input, "%d %d %d %d", &ir[i].op, &ir[i].r, &ir[i].l, &ir[i].m);
+        if(fscanf(input, "%s %d %d %d", ir[i].op, &ir[i].r, &ir[i].l, &ir[i].m) > 0 );
     }
 
     printf("\t\t\t\tPC\tBP\tSP\n");
@@ -71,7 +65,7 @@ int main()
         int L = ir[PC].l;
         int M = ir[PC].m;
 
-        switch (ir[PC].op)
+        switch (ir[PC].opcode)
         {
         //LIT - loads a constant value M into register R
         case 1:
@@ -146,7 +140,7 @@ int main()
             //Read in input from the user and store it in a reg.
             case 2:
                 printf("enter a numbr to store in a register: ");
-                scanf("%d", &RF[R]);
+                if(scanf("%d", &RF[R]) > 0 );
             //End of program
             case 3:
                 printf("\n\n%d SYS %d %d %d", PC, R, L, M);
@@ -201,7 +195,8 @@ int main()
 
     // Close the file
     fclose(input);
-    return 0;
+    printf("print the stack\n");
+    return;
 }
 int base(int l, int base)
 {

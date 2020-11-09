@@ -7,6 +7,7 @@
 
 int main(int argc, char **argv)
 {
+printf("in driver");
 	if (argc < 2)
 		printf("error : please include the file name");
 	

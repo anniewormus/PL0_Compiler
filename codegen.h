@@ -8,6 +8,7 @@ typedef struct instruction
 {
 	int opcode;
 	char *op;
+	int r;
 	int l;
 	int m;
 	

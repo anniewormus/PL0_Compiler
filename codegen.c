@@ -10,6 +10,17 @@ int cx = 0, numVars, lexIndex = 0, symTabIndx, curCodeIndx;
 instruction* code;
 token_type token;
 
+//method prototypes
+instruction* generate_code(symbol *table, lexeme *list);
+void block(instruction* code, symbol* table, lexeme* list, token_type token);
+void statement(symbol* table, lexeme* list);
+void condition(lexeme* list, symbol* table);
+void expression(lexeme* list, symbol* table, int regdest);
+void term(lexeme* list, symbol* table, int reg);
+void factor(lexeme* list, symbol* table, int reg);
+void emit(int op, int r, int l, int m);
+int incToken(token_type token, lexeme* list, int jump);
+
 instruction* generate_code(symbol *table, lexeme *list){
 
     code = malloc(500 * sizeof(instruction));

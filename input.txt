@@ -1,0 +1,4 @@
+var x, y;
+egin
+x:=y+56;
+end.

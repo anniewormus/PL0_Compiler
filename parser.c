@@ -6,31 +6,29 @@
 
 //method prototypes
 symbol* parser(lexeme* list);
-void block(symbol* table, lexeme* list, int token);
+void pblock(symbol* table, lexeme* list, int token);
 void constDeclaration(symbol* table, int token);
 void varDeclaration(symbol* table, int token);
-void statement(symbol* table, int token);
-void condition(int token);
-void expression(int token);
-void term(int token);
-void factor(symbol* table, int token);
+void pstatement(symbol* table, int token);
+void pcondition(int token);
+void pexpression(int token);
+void pterm(int token);
+void pfactor(symbol* table, int token);
 int symCheck(int index, symbol * sym, char * token);
 void addToSymTable(symbol* sym, int kind, char* name, int val, int lex, int m, int mark);
 int getNextToken(token_type token);
 int relopCheck(int token, int sym);
 
-int lexIndex = 0, symTableIndex = 0, check;
+int plexIndex = 0, symTableIndex = 0, check;
 token_type token;
 symbol* table;      //symbol table
 lexeme* list;
 
-symbol* parser(lexeme* list){
+symbol* parse(lexeme* list){
     table = malloc(500 * sizeof(symbol));
-    
-    int i = 0;
 
-    token = list[lexIndex].type;
-    block(table, list, token);
+    token = list[plexIndex].type;
+    pblock(table, list, token);
 
     //if program doesn't end in a period throw error
     if(token != periodsym){
@@ -41,35 +39,32 @@ symbol* parser(lexeme* list){
     return table;
 }
 
-void block(symbol* table, lexeme* list, int token){
+void pblock(symbol* table, lexeme* list, int token){
     if(token == constsym){
-        constDeclataion(table, token);
+        constDeclaration(table, token);
     }else if(token == varsym){
         varDeclaration(table, token);
     }else{
-        statement(table, token);
+        pstatement(table, token);
     }
 }
 //variable is declared as a constant
 void constDeclaration(symbol* table, int token){
-    int i;
     char * varName;
     do{
-        lexIndex++;
-        token = list[lexIndex].type;
+        plexIndex++;
+        token = list[plexIndex].type;
         if(token != identsym){
             printf("ERROR: Const must be followed by identifier");
         }
     
-        token = list[lexIndex].name;
-
         //checks to see if the constant varible has already been declared
-        check = symCheck(lexIndex, table, token);
+        check = symCheck(plexIndex, table, list[plexIndex].name);
 
         if(check == 0){     //check fails, identifier already exists
             printf("ERROR: Identifier Already Exists");
         }else if(check == 1){       //check passes
-            strcpy(varName, token);
+            strcpy(varName, list[plexIndex].name);
         }
 
         token = getNextToken(token);
@@ -85,7 +80,7 @@ void constDeclaration(symbol* table, int token){
         }
 
         //if everything checks out, add to symbol table
-        addToSymTable(table, 1, varName, token, 0, 0, 0);
+        addToSymTable(table, 1, list[plexIndex].name, token, 0, 0, 0);
 
         token = getNextToken(token);
 
@@ -109,11 +104,11 @@ void varDeclaration(symbol* table, int token){
                 printf("ERROR: Var Must Be Followed By An Identifier");
             }
             //check to see if ident is already in symbol table
-            check = symCheck(lexIndex, table, token);
+            check = symCheck(plexIndex, table, list[plexIndex].name);
             if(check == 0){
                 printf("ERROR: Identifier Already Exists");
             }else if(check == 1){
-                addToSymTable(table, 2, list[lexIndex].name, 0, 0, numVars + 2, 0);
+                addToSymTable(table, 2, list[plexIndex].name, 0, 0, numVars + 2, 0);
             }
 
             token = getNextToken(token);
@@ -127,11 +122,11 @@ void varDeclaration(symbol* table, int token){
     }
 }
 
-void statement(symbol* table, int token){
+void pstatement(symbol* table, int token){
     switch(token){
         case identsym:
             //if ident is not in symbol table
-            check = symCheck(symTableIndex, table, list[lexIndex].name);
+            check = symCheck(symTableIndex, table, list[plexIndex].name);
             if(check == 0){
                 printf("ERROR: Undeclared Identifier");
             }
@@ -142,15 +137,15 @@ void statement(symbol* table, int token){
             }
             token = getNextToken(token);
 
-            expression(token);
+            pexpression(token);
             break;
 
         case beginsym:
             token = getNextToken(token);
-            statement(table, token);
+            pstatement(table, token);
             while(token == semicolonsym){
                 token = getNextToken(token);
-                statement(table, token);
+                pstatement(table, token);
             }
             if(token != endsym){
                 printf("ERROR: } Expected");
@@ -160,22 +155,22 @@ void statement(symbol* table, int token){
 
         case ifsym:
             token = getNextToken(token);
-            condition(token);
+            pcondition(token);
             if(token != thensym){
                 printf("ERROR: then Expected");
             }
             token = getNextToken(token);
-            statement(table, token);
+            pstatement(table, token);
             break;
 
         case whilesym:
             token = getNextToken(token);
-            condition(token);
+            pcondition(token);
             if(token != dosym){
                 printf("ERROR: do Expected");
             }
             token = getNextToken(token);
-            statement(table, token);
+            pstatement(table, token);
             break;
 
         case readsym:
@@ -184,7 +179,7 @@ void statement(symbol* table, int token){
                 printf("ERROR: Call Must Be Followed By An Identifier");
             }
             //check to see if identifier is on symbol table
-            check = symCheck(symTableIndex, table, list[lexIndex].name);
+            check = symCheck(symTableIndex, table, list[plexIndex].name);
             if(check == 1){
                 printf("ERROR: Undeclared Identifier");
             }
@@ -198,7 +193,7 @@ void statement(symbol* table, int token){
             if(token != identsym){
                 printf("ERROR: Call Must Be Followed By An Identifier");
             }
-            check = symCheck(symTableIndex, table, list[lexIndex].name);
+            check = symCheck(symTableIndex, table, list[plexIndex].name);
             if(check == 1){
                 printf("ERROR: Undeclared Identifier");
             }
@@ -207,12 +202,12 @@ void statement(symbol* table, int token){
     }
 }
 
-void condition(int token){
+void pcondition(int token){
     if(token == oddsym){
         token = getNextToken(token);
-        expression(token);
+        pexpression(token);
     }else{
-        expression(token);
+        pexpression(token);
         int rcheck = 0;
         rcheck = relopCheck(token, eqsym);
         rcheck = relopCheck(token, neqsym);
@@ -224,33 +219,33 @@ void condition(int token){
             printf("ERROR: Rel-Op Expected");
         }
         token = getNextToken(token);
-        expression(token);
+        pexpression(token);
     }
 
 }
-void expression(int token){
+void pexpression(int token){
     if(token == plussym || token == minussym){
         token = getNextToken(token);
     }
-    term(token);
+    pterm(token);
     while(token == plussym || token == minussym){
         token = getNextToken(token);
-        term(token);
+        pterm(token);
     }
 
 }
 
-void term(int token){
-    factor(table, token);
+void pterm(int token){
+    pfactor(table, token);
     while(token == multsym || token == slashsym){
         token = getNextToken(token);
-        factor(table, token);
+        pfactor(table, token);
     }
 }
 
-void factor(symbol* table, int token){
+void pfactor(symbol* table, int token){
     if(token == identsym){
-        check = symCheck(symTableIndex, table, list[lexIndex].name);
+        check = symCheck(symTableIndex, table, list[plexIndex].name);
             if(check == 1){
                 printf("ERROR: Undeclared Identifier");
             }
@@ -259,7 +254,7 @@ void factor(symbol* table, int token){
         token = getNextToken(token);
     }else if(token == lparentsym){
         token = getNextToken(token);
-        expression(token);
+        pexpression(token);
         if(token != rparentsym){
             printf("ERROR: ) Expected");
         }
@@ -279,6 +274,7 @@ int symCheck(int index, symbol * sym, char * token){
             return 1;       //passed
         }
     }
+    return 1;
 }
 
 void addToSymTable(symbol* sym, int kind, char* name, int val, int lex, int m, int mark){
@@ -292,13 +288,15 @@ void addToSymTable(symbol* sym, int kind, char* name, int val, int lex, int m, i
 }
 
 int getNextToken(token_type token){
-    lexIndex++;
-    return list[lexIndex].type;
+    plexIndex++;
+    return list[plexIndex].type;
 }
 
 int relopCheck(int token, int sym){
     if(token == sym){
         return 1;
+    }else{
+        return 0;
     }
 }
 

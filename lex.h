@@ -1,3 +1,6 @@
+#ifndef __LEX_H
+#define __LEX_H
+
 typedef struct lexeme
 {
 	char *name;
@@ -27,7 +30,8 @@ typedef struct
     int errorType;
 } tokenStruct;
 
-lexeme* lexAnalyze(char* inputFile);
+lexeme* lex_analyze(char* inputFile);
 
+#endif
 
 
