@@ -244,7 +244,7 @@ void emit(int op, int r, int l, int m){
     if (cx > CODE_SIZE){
         printf("ERROR: Code Is Too Large");
     }else{
-        code[cx].op = op;
+        code[cx].opcode = op;
         code[cx].r = r;
         code[cx].l = l;
         code[cx].m = m;
