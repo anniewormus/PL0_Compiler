@@ -1,0 +1,12 @@
+				PC	BP	SP
+Initial Values: 				0	999	1000	
+Registers: 0 0 0 0 0 0 0 0 
+Stack: 
+
+0 INC 0 0 5				1	999	995	
+Registers: 0 0 0 0 0 0 0 0 
+Stack: 0 0 0 0 0 
+
+1 LIT 1 0 56				2	999	995	
+Registers: 0 56 0 0 0 0 0 0 
+Stack: 0 0 0 0 0 

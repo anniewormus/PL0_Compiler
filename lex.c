@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+
 #include "lex.h"
 
 //array for reserved words names
@@ -14,44 +15,40 @@ char *reservedWords[] = {"const", "var", "procedure", "call", "begin", "end", "i
 //array for special symbols
 char specialSyms[] = {'+', '-', '*', '/', '(', ')', '=', ',', '.', '<', '>', ';', ':'};
 
-tokenStruct lexemeList[3000]; //array of token structs
-int lexcount = 0;
-
-lexeme *list;
+FILE *output;
 
 lexeme* lex_analyze(char *inputfile)
 {
-    list = malloc(500 * sizeof(lexeme));
+    lexeme *list = malloc(500 * sizeof(lexeme));
 
     int peek = 0; //used in the event of multiple characater tokens
 
-    //get file name from user input
-    char fileName[25];
-    printf("What is your input file called? ");
-    if(scanf("%s", fileName) > 0);
+    tokenStruct lexemeList[3000]; //array of token structs
+    int lexcount = 0;   //keeps track of array location
+    
 
-    FILE *input = fopen(fileName, "r");
-    int c = fgetc(input); //stores each character in file
+    output = fopen("lexout.txt", "w");
+
+    int i = 0;
+    //char c = inputfile[i]; //stores each character in file
 
     //print the source code from the file
-    printf("SOURCE CODE:\n");
-    while (c != EOF)
-    {
-        printf("%c", c);
-        c = fgetc(input);
-    }
-    fclose(input);
+    //printf("SOURCE CODE:\n%s", inputfile);
+    
+
+    //fclose(input);
 
     //reset file
-    input = fopen(fileName, "r");
-    c = fgetc(input);
+    //input = fopen(inputfile, "r");
+    int indx = 0;
+    char c = inputfile[indx];
 
-    while (c != EOF)
+    while (c != '\0')
     {
         //ignore tabs, white spaces, and newlines
         if (iscntrl(c) || isspace(c))
         {
-            c = fgetc(input);
+            c = inputfile[++indx];
             continue;
         }
         else if (isalpha(c))
@@ -62,7 +59,7 @@ lexeme* lex_analyze(char *inputfile)
             word[0] = c;
             length++;
             peek = 1;
-            c = fgetc(input);
+            c = inputfile[++indx];
             while (isalpha(c) || isdigit(c))
             {
                 //errors out if identifier is longer than 11 characters
@@ -72,20 +69,20 @@ lexeme* lex_analyze(char *inputfile)
                     lexemeList[lexcount].errorType = 3;      
                     while (isalpha(c) || isdigit(c))
                     {
-                        c = fgetc(input);
+                        c = inputfile[++indx];
                     }
                     peek = 0;
                     break;
                 }
                 word[length] = c;
-                c = fgetc(input);
+                c = inputfile[++indx];
                 length++;
                 
             }
             //check to see if word is a reserve word
-            int i;
+            int i = 0;
             int reswordcheck = 100;
-            for (i = 0; i < 14; i++)
+            for (i; i < 14; i++)
             {
                 if (strcmp(word, reservedWords[i]) == 0)
                 {
@@ -151,7 +148,7 @@ lexeme* lex_analyze(char *inputfile)
         {
             int digit = c - '0';
             int digLength = 1;
-            c = fgetc(input);
+            c = inputfile[++indx];
             peek = 1;
 
             while (isdigit(c))
@@ -163,13 +160,13 @@ lexeme* lex_analyze(char *inputfile)
                     lexemeList[lexcount].errorType = 2;
                     while (isdigit(c))
                     {
-                        c = fgetc(input);
+                        c = inputfile[++indx];
                     }
                     break;
                 }
                 digit = 10 * digit + (c - '0');
                 digLength++;
-                c = fgetc(input);
+                c = inputfile[++indx];
             }
 
             //throws error if the variable starts with a number
@@ -177,10 +174,10 @@ lexeme* lex_analyze(char *inputfile)
             {
                // printf("ERROR: Variable does not start with letter");
                 lexemeList[lexcount].errorType = 1;
-                c = fgetc(input);
+                c = inputfile[++indx];
                 while (isalpha(c) || isdigit(c))
                 {
-                    c = fgetc(input);
+                    c = inputfile[++indx];
                 }
             }
             lexemeList[lexcount].numVal = digit;
@@ -192,7 +189,7 @@ lexeme* lex_analyze(char *inputfile)
             //if the character is a special symbol
             peek = 0;
             int i;
-            int sym = 100;
+            int sym;
             for (i = 0; i < 13; i++)
             {
                 if (c == specialSyms[i])
@@ -222,18 +219,18 @@ lexeme* lex_analyze(char *inputfile)
                 break;
             //comment
             case 3:
-                c = fgetc(input);
+                c = inputfile[++indx];
                 peek = 1;
                 if (c == '*')
                 {
-                    c = fgetc(input);
+                    c = inputfile[++indx];
                     int loop = 1;
                     peek = 0;
                     while (loop)
                     {
                         if (c == '*')
                         {
-                            c = fgetc(input);
+                            c = inputfile[++indx];
                             if (c == '/')
                             {
                                 loop = 0;
@@ -241,7 +238,7 @@ lexeme* lex_analyze(char *inputfile)
                         }
                         else
                         {
-                            c = fgetc(input);
+                            c = inputfile[++indx];
                         }
                     }
                 }
@@ -284,7 +281,7 @@ lexeme* lex_analyze(char *inputfile)
                 break;
             //<>, >=, >
             case 9:
-                c = fgetc(input);
+                c = inputfile[++indx];
                 peek = 1;
                 if (c == '>')
                 {
@@ -307,7 +304,7 @@ lexeme* lex_analyze(char *inputfile)
                 break;
             //>=
             case 10:
-                c = fgetc(input);
+                c = inputfile[++indx];
                 peek = 1;
                 if (c == '=')
                 {
@@ -330,7 +327,7 @@ lexeme* lex_analyze(char *inputfile)
                 break;
             //:=
             case 12:
-                c = fgetc(input);
+                c = inputfile[++indx];
                 if (c == '=')
                 {
                     lexemeList[lexcount].tokenVal = becomessym;
@@ -351,18 +348,17 @@ lexeme* lex_analyze(char *inputfile)
         }
         if (peek == 0)
         {
-            c = fgetc(input);
+            c = inputfile[++indx];
         }
     }
-    
     //print out lexeme list and token type
-    int i;
-    printf("\nLEXEME TABLE:\nLEXEME\tTOKEN TYPE\n");
-    for (i = 0; i < lexcount; i++)
+    i = 0;
+    //printf("\nLEXEME TABLE:\nLEXEME\tTOKEN TYPE\n");
+    for (i; i < lexcount; i++)
     {
         if (lexemeList[i].tokenVal == 3)
         {
-            printf("\n%d\t%d\t", lexemeList[i].numVal, lexemeList[i].tokenVal);
+            //printf("\n%d\t%d\t", lexemeList[i].numVal, lexemeList[i].tokenVal);
             if(lexemeList[i].errorType == 1){
                 printf("\nERROR: Variable can't start with a number.");
             }else if(lexemeList[i].errorType == 2){
@@ -375,7 +371,7 @@ lexeme* lex_analyze(char *inputfile)
         }
         else
         {
-            printf("\n%s\t%d\t", lexemeList[i].varname, lexemeList[i].tokenVal);
+            //printf("\n%s\t%d\t", lexemeList[i].varname, lexemeList[i].tokenVal);
             if(lexemeList[i].errorType == 1){
                 printf("\nERROR: Variable can't start with a number.");
             }else if(lexemeList[i].errorType == 2){
@@ -388,22 +384,25 @@ lexeme* lex_analyze(char *inputfile)
         }
     }
     //prints lexeme list
-    printf("\nLEXEME LIST\n");
+    fprintf(output, "LEXEME LIST\n");
     for (i = 0; i < lexcount; i++)
     {
+        fprintf(output, "%d ", lexemeList[i].tokenVal);
         list[i].type = lexemeList[i].tokenVal;
-        printf("%d ", lexemeList[i].tokenVal);
         if (lexemeList[i].tokenVal == 2)
         {
-            list[i].name = lexemeList[i].varname;
-            printf("%s ", lexemeList[i].varname);
+            fprintf(output, "%s ", lexemeList[i].varname);
+            strcpy(list[i].name, lexemeList[i].varname);
         }
         else if (lexemeList[i].tokenVal == 3)
         {
+           fprintf(output,"%d ", lexemeList[i].numVal);
             list[i].value = lexemeList[i].numVal;
-            printf("%d ", lexemeList[i].numVal);
         }
     }
-    printf("lex is analyzed\n");
+    
+    printf("\nLex is analyzed\n");
+   // fclose(input);
+    fclose(output);
     return list;
 }

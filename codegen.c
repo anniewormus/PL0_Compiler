@@ -6,13 +6,9 @@
 
 #define CODE_SIZE 500
 
-int cx = 0, numVars, lexIndex = 0, symTabIndx, curCodeIndx;
-instruction* code;
-token_type token;
-
 //method prototypes
 instruction* generate_code(symbol *table, lexeme *list);
-void block(instruction* code, symbol* table, lexeme* list, token_type token);
+void block(instruction* code, symbol* table, lexeme* list);
 void statement(symbol* table, lexeme* list);
 void condition(lexeme* list, symbol* table);
 void expression(lexeme* list, symbol* table, int regdest);
@@ -21,23 +17,35 @@ void factor(lexeme* list, symbol* table, int reg);
 void emit(int op, int r, int l, int m);
 int incToken(token_type token, lexeme* list, int jump);
 
+FILE* output;
+
+int cx = 0, numVars, lexIndex = 0, symTabIndx, curCodeIndx;
+instruction* code;
+token_type token;
+
 instruction* generate_code(symbol *table, lexeme *list){
 
     code = malloc(500 * sizeof(instruction));
-    token = list[lexIndex].value;
-    
+    token = list[lexIndex].type;
+    output = fopen("codegenout.txt", "w");
     //JMP
-    emit(7, 0, 0, 1);
-    block(code, table, list, token);
+    //emit(7, 0, 0, 1);
+    block(code, table, list);
 
     //HALT
     emit(9, 0, 0, 3);
 
     printf("code has been generated\n");
+    int i;
+    for(i = 0; i < cx; i++){
+        fprintf(output, "%d %d %d %d \n", code[i].opcode, code[i].r, code[i].l, code[i].m);
+    }
+    fclose(output);
     return code;
 }
 
-void block(instruction* code, symbol* table, lexeme* list, token_type token){
+void block(instruction* code, symbol* table, lexeme* list){
+    //printf("in block - token = %d\n", token);
     numVars = 0;
     if(token == constsym){
         do{
@@ -58,12 +66,14 @@ void block(instruction* code, symbol* table, lexeme* list, token_type token){
 }
 
 void statement(symbol* table, lexeme* list){
+   // printf("in state\n");
     switch(token){
         case identsym:
             symTabIndx = lexIndex;
             token = incToken(token, list, 2);
             expression(list, table, 0);
             //STO
+            //printf("STO VALUE: %d\n", table[symTabIndx].addr);
             emit(4, 0, 0, table[symTabIndx].addr);
             break;
 
@@ -106,6 +116,7 @@ void statement(symbol* table, lexeme* list){
             //READ
             emit(9, 0, 0, 2);
             //STO
+            //printf("STO VALUE: %d\n", table[symTabIndx].addr);
             emit(4, 0, 0, table[symTabIndx].addr);
             break;
         case writesym:
@@ -128,6 +139,7 @@ void statement(symbol* table, lexeme* list){
     }
 }
 void condition(lexeme* list, symbol* table){
+    //printf("in cond\n");
     if(token == oddsym){
         token = incToken(token, list, 1);
         expression(list, table, 0);
@@ -170,6 +182,7 @@ void condition(lexeme* list, symbol* table){
     }
 }
 void expression(lexeme* list, symbol* table, int regdest){
+    //printf("in exp\n");
     if(token == plussym){
         token = incToken(token, list, 1);
     }
@@ -206,6 +219,7 @@ void expression(lexeme* list, symbol* table, int regdest){
 
 }
 void term(lexeme* list, symbol* table, int reg){
+    //printf("in term\n");
     factor(list, table, reg);
     while(token == multsym || token == slashsym){
         if(token == multsym){
@@ -221,6 +235,7 @@ void term(lexeme* list, symbol* table, int reg){
     }
 }
 void factor(lexeme* list, symbol* table, int reg){
+    //printf("in factor\n");
     if(token == identsym){
         symTabIndx = lexIndex; 
         if(token == constsym){
@@ -253,6 +268,7 @@ void emit(int op, int r, int l, int m){
 }
 
 int incToken(token_type token, lexeme* list, int jump){
+    //printf("in inc\n");
     lexIndex += jump;
     return list[lexIndex].type;
 }

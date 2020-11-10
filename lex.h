@@ -3,7 +3,7 @@
 
 typedef struct lexeme
 {
-	char *name;
+	char name[10];
 	int value;
 	int type;
 	
