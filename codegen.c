@@ -35,7 +35,7 @@ instruction* generate_code(symbol *table, lexeme *list){
     //HALT
     emit(9, 0, 0, 3);
 
-    printf("code has been generated\n");
+    // printf("code has been generated\n");
     int i;
     for(i = 0; i < cx; i++){
         fprintf(output, "%d %d %d %d \n", code[i].opcode, code[i].r, code[i].l, code[i].m);

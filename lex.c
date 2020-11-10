@@ -401,7 +401,7 @@ lexeme* lex_analyze(char *inputfile)
         }
     }
     
-    printf("\nLex is analyzed\n");
+    // printf("\nLex is analyzed\n");
    // fclose(input);
     fclose(output);
     return list;

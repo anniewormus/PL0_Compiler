@@ -39,7 +39,7 @@ symbol* parse(lexeme* list){
         exit(0);
     }
    // int i;
-    printf("symbols are parsed\n");
+    // printf("symbols are parsed\n");
     // for(i = 0; i < symTableIndex; i++){
     //     printf("TABLE: %d ", table[i].addr);
     // }

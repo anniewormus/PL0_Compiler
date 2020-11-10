@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include "lex.h"
 #include "parser.h"
@@ -7,22 +8,24 @@
 
 int main(int argc, char **argv)
 {
+	
 	//reads in console commands for what the user wants to see
 	int lflag, aflag, vflag;
 	int i;
-	for(i = 0; i < 3; i++){
+	for(i = 0; i < argc; i++){
 		if(strcmp(argv[i], "-l") == 0){
 			printf("lflag set\n");
 			lflag = 1;
-		}
-		if(strcmp(argv[i], "-a") == 0){
-			printf("aflag set\n");
-			aflag = 1;
 		}
 		if(strcmp(argv[i], "-v") == 0){
 			printf("vflag set\n");
 			vflag = 1;
 		}
+		if(strcmp(argv[i], "-a") == 0){
+			printf("aflag set\n");
+			aflag = 1;
+		}
+		
 	}
 //get file name from user input
     char fileName[25];
@@ -46,24 +49,37 @@ int main(int argc, char **argv)
 	}
 	inputfile[i] = '\0';
 	
-	printf("%s\n", inputfile);
-	
 	lexeme *list = lex_analyze(inputfile);
 	symbol *table = parse(list);
-	printf("done w parse\n");
 	instruction *code = generate_code(table, list);
-	printf("done w code gen\n");
 	virtual_machine(code);
-	printf("done w vm\n");
 
 	if(lflag == 1){
-		printf("Lex Output:\n");
+		printf("SCANNER OUTPUT:\n");
 		FILE *lexfile = fopen("lexout.txt", "r");
 		while((c = fgetc(lexfile)) != EOF){
             printf("%c", c);
         }
         printf("\n\n");
-        fclose(ifp);
+        fclose(lexfile);
+	}
+	if(aflag == 1){
+		printf("PARSER/CODEGEN OUTPUT:\n");
+		FILE *codefile = fopen("codegenout.txt", "r");
+		while((c = fgetc(codefile)) != EOF){
+            printf("%c", c);
+        }
+        printf("\n\n");
+        fclose(codefile);
+	}
+	if(vflag == 1){
+		printf("VIRTUAL MACHINE OUTPUT:\n");
+		FILE *vmfile = fopen("vmout.txt", "r");
+		while((c = fgetc(vmfile)) != EOF){
+            printf("%c", c);
+        }
+        printf("\n\n");
+        fclose(vmfile);
 	}
 	
 	return 0;

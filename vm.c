@@ -172,7 +172,6 @@ void virtual_machine(instruction *code)
     }
 
     // Close the file
-    printf("print the stack\n");
     fclose(output);
     return;
 }
